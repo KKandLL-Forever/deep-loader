@@ -10,6 +10,10 @@
   "engines": {
     "node": ">= 14.15.0"
   },
+  "files": [
+    "src/index.js",
+    "dist/cjs.js"
+  ],
   "keywords": [
     "webpack",
     "loader"
