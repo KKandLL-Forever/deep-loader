@@ -10,20 +10,47 @@ module.exports = {
   },
   // 从node_modules以及loaders文件夹下加载loader，方便我们调试
   resolveLoader: {
-    modules: ["node_modules", path.resolve(__dirname, "src")],
+    modules: ["node_modules", path.resolve(__dirname, "dist")],
   },
   module: {
     rules: [
       {
         test: /\.scss$/,
+        exclude: /node_modules/,
         use: [
           'style-loader',
           'css-loader',
-          'sass-loader',
-          // 所有的js文件都将加载这个loader，并且有个text的配置项
-          "index"
+          {
+            loader:'sass-loader',
+            options: { implementation: require('node-sass')}
+          },
+          // 先使用我们自己的loader
+          // 'cjs'
         ],
       },
+      {
+        test: /\.scss$/,
+        exclude: /node_modules/,
+        use: ['cjs']
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              ['@babel/preset-env',
+                {
+                  targets: {
+                    node: "14.15.0",
+                  }
+                }
+              ]
+            ]
+          }
+        }
+      }
     ],
   },
 }

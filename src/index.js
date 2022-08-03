@@ -1,4 +1,7 @@
-import { getOptions } from 'loader-utils';
+// import {getOptions} from 'loader-utils';
+// import util from 'util'
+import {parse, stringify} from 'scss-parser'
+import createQueryWrapper from 'query-ast'
 // 校验loader传入的options
 // const { validate } = require("schema-utils");
 
@@ -14,11 +17,41 @@ import { getOptions } from 'loader-utils';
 // };
 
 export default function (source) {
-  // 获取到用户给当前 loader 传入的 options
-  // webpack v5 内置了这个方法，之前需要loader-utils这个包
-  const options = getOptions(this) || {};
-  // 对loader传入的options做校验
-  // validate(schema, options, {name:"index"});
-  // 将我们传入的信息插入到source中
-  return source;
-};
+  if (source.includes('/deep/')) {
+    // parse scss code to ast
+    let ast = parse(source)
+    // console.log(util.inspect(ast, false, null, true))
+    let $ = createQueryWrapper(ast, {})
+    let insert = [
+      {
+        type: 'punctuation',
+        value: ':',
+      },
+      {
+        type: 'pseudo_class',
+        value: [
+          {
+            type: 'identifier',
+            value: 'v-deep',
+          }
+        ],
+      },
+    ]
+    // find target node
+    let firstNode = $(n => n.node.value === '/').first()
+    // insert node before oldNode
+    for (const obj of insert) {
+      firstNode.before(obj)
+    }
+    // remove oldNode
+    $(n => n.node.value === '/').remove()
+    $(n => n.node.value === 'deep').remove()
+    console.log(firstNode, 'node')
+    let res = stringify($().get(0))
+    console.log(res)
+    
+    return stringify($().get(0))
+  }else{
+    return source
+  }
+}
